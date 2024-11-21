@@ -1,6 +1,4 @@
-# kgdata
-
-Knowledge Graph Related Datasets
+# MLCommons Knowledge Graph Datasets
 
 
 ## Datasets
