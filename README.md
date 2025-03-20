@@ -1,5 +1,49 @@
 # MLCommons Knowledge Graph Datasets
 
+## Architectural Overview
+
+The goal of this project is to facilitate evaluation of models for two core knowledge extraction tasks:
+
+ * **Named Entity Recognition (NER)** - the recognition of subjects (e.g., noun phrases) in a passage of text
+ * **Relation Extraction (RE)** - the recognition of relations between named entities based on some ontology of relationships
+
+Many generative AI models (i.e., LLM's) can perform these tasks sufficiently well. The challenge is measuring how
+well they can do this with many of the following considerations (non-exhaustive):
+
+ * can they recognize variations of named entities (e.g., plurals, suffixes, etc.) and understand when they are the same entity,
+ * can they parse the direct and indirect relations between named entities,
+ * will they only use the evidence provided in the text or will they draw upon "embedded information" possibly contained within the model,
+ * or, do they fabricate other relations and entities?
+
+The intent of the framework provided by this project is to deliver:
+
+ * a mechanism for encoding datasets based on [MLCommon's Croissant](https://github.com/mlcommons/croissant) that can provide metadata about:
+   * a subject classification
+   * the corpus
+   * target entity classes and relations
+   * NER and RE annotations for the corpus
+   * optional ontology or mappings for relations to facilitate evaluation
+ * provide an overall model for NERRE evaluation and benchmarking
+ * provide an exemplar workflow for evaluation
+ * provide an exemplar benchmark and reporting mechanism
+
+## The workflow
+
+![The Workflow](NERRE-overview.svg)
+
+At the top is the System Under Test (SUT) that represents the model (e.g., an LLM combined with a specific prompt) which can also provide basic metadata about its capabilities. At the bottom is the dataset being used for evaluation that has annotations, ideally in [MLCommons Croissant](https://github.com/mlcommons/croissant) compatible formats, which describes the entity classes, relations, and other information useful for evaluation. Throughout the middle of this workflow is the evaluation and benchmarking.
+
+At the far left, the workflow starts with **Preparation Stage** that checks the capabilities of the SUT and the dataset to ensure they are sufficiently compatible. This stage may also consider various evaluation options and how they may affect the success of the overall workflow. Assuming the merger of the SUT, dataset, and options capabilities is successful, the workflow passes onto the next stage. Otherwise, the evaluation will fail and terminate at this stage.
+
+At the center is the per-item **Inference Stage** sub-workflow. For each text item provided by the dataset, the SUT is invoked to accomplish the 
+RE task. The output of this invocation is a sequence of relations between entities that includes the source entity, target entity, and the relation between them. As models may not always provide the exact entities and relations expected by the dataset annotations, there is an optional filtering staging that can provide additional mappings or cleanup. Such filtering and cleanup is a consequence of the evaluation 
+options provided at the invocation of the workflow. Subsequently, the relations provided are stored for later evaluation.
+
+At the far right is the final **Judgement Stage** sub-workflow where the RE inference provided by the SUT is scored and judged. 
+The intent of this sub-workflow is to provide a set of common metrics via scoring (e.g., matched/missing entities, 
+misclassified entities, matched/missing relations, etc.) on which a set of judgements can be performed. Depending on the 
+benchmarking needs, the judgement algorithm may change but the scoring should stay constant. The result of this stage is a benchmark 
+report that should be machine and human readable.
 
 ## Datasets
 
